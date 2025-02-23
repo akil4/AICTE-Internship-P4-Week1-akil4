@@ -172,7 +172,7 @@ const Home = () => {
 
   const handleChartClick = (e) => {
     setView("chart");
-  };
+  }; 
 
   return (
     <>

@@ -1,26 +1,16 @@
-// LoginPage.js
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { loginAPI } from "../../utils/ApiRequest";
+import { Google as GoogleIcon, GitHub as GitHubIcon } from "@mui/icons-material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (localStorage.getItem("user")) {
-      navigate("/");
-    }
-  }, [navigate]);
-
   const [values, setValues] = useState({
     email: "",
     password: "",
@@ -37,171 +27,124 @@ const Login = () => {
     theme: "dark",
   };
 
+  useEffect(() => {
+    if (localStorage.getItem("user")) {
+      navigate("/");
+    }
+  }, [navigate]);
+
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const { email, password } = values;
-
     setLoading(true);
 
-    const { data } = await axios.post(loginAPI, {
-      email,
-      password,
-    });
-
-    if (data.success === true) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/");
-      toast.success(data.message, toastOptions);
+    if (!email || !password) {
+      toast.error("Email and password are required", toastOptions);
       setLoading(false);
-    } else {
-      toast.error(data.message, toastOptions);
+      return;
+    }
+
+    try {
+      const { data } = await axios.post(loginAPI, { email, password });
+      if (data.success === true) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/");
+        toast.success(data.message, toastOptions);
+      } else {
+        toast.error(data.message, toastOptions);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.", toastOptions);
+    } finally {
       setLoading(false);
     }
   };
 
-  const particlesInit = useCallback(async (engine) => {
-    // console.log(engine);
-    await loadFull(engine);
-  }, []);
+  const handleGoogleLogin = () => {
+    window.location.href = "YOUR_GOOGLE_AUTH_URL";
+  };
 
-  const particlesLoaded = useCallback(async (container) => {
-    // await console.log(container);
-  }, []);
+  const handleGitHubLogin = () => {
+    window.location.href = "YOUR_GITHUB_AUTH_URL";
+  };
 
   return (
-    <div style={{ position: "relative", overflow: "hidden" }}>
-      <Particles
-        id="tsparticles"
-        init={particlesInit}
-        loaded={particlesLoaded}
-        options={{
-          background: {
-            color: {
-              value: "#000",
-            },
-          },
-          fpsLimit: 60,
-          particles: {
-            number: {
-              value: 200,
-              density: {
-                enable: true,
-                value_area: 800,
-              },
-            },
-            color: {
-              value: "#ffcc00",
-            },
-            shape: {
-              type: "circle",
-            },
-            opacity: {
-              value: 0.5,
-              random: true,
-            },
-            size: {
-              value: 3,
-              random: { enable: true, minimumValue: 1 },
-            },
-            links: {
-              enable: false,
-            },
-            move: {
-              enable: true,
-              speed: 2,
-            },
-            life: {
-              duration: {
-                sync: false,
-                value: 3,
-              },
-              count: 0,
-              delay: {
-                random: {
-                  enable: true,
-                  minimumValue: 0.5,
-                },
-                value: 1,
-              },
-            },
-          },
-          detectRetina: true,
-        }}
-        style={{
-          position: "absolute",
-          zIndex: -1,
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      />
-      <Container
-        className="mt-5"
-        style={{ position: "relative", zIndex: "2 !important" }}
-      >
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        backgroundColor: "#1e1e2e",
+        color: "#c3aed6",
+      }}
+    >
+      <Container>
         <Row>
           <Col md={{ span: 6, offset: 3 }}>
-            <h1 className="text-center mt-5">
-              <AccountBalanceWalletIcon
-                sx={{ fontSize: 40, color: "white" }}
-                className="text-center"
-              />
-            </h1>
-            <h2 className="text-white text-center ">Login</h2>
+    <h1 style={{ color: "#a277ff", fontWeight: "bold", textAlign: "center" }}>FinArch</h1>
+    <h1 className="text-center mt-3">
+      <AccountBalanceWalletIcon sx={{ fontSize: 40, color: "#a277ff" }} />
+    </h1>
+            <h2 className="text-center" style={{ color: "#a277ff" }}>Login</h2>
+
+            {/* Login with Google & GitHub */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "20px" }}>
+              <Button onClick={handleGoogleLogin} style={{ backgroundColor: "#6d28d9", borderColor: "#6d28d9", color: "#ffffff" }}>
+                <GoogleIcon />
+              </Button>
+              <Button onClick={handleGitHubLogin} style={{ backgroundColor: "#6d28d9", borderColor: "#6d28d9", color: "#ffffff" }}>
+                <GitHubIcon />
+              </Button>
+            </div>
+
             <Form>
               <Form.Group controlId="formBasicEmail" className="mt-3">
-                <Form.Label className="text-white">Email address</Form.Label>
+                <Form.Label style={{ color: "#c3aed6" }}>Email address</Form.Label>
                 <Form.Control
                   type="email"
                   placeholder="Enter email"
                   name="email"
                   onChange={handleChange}
                   value={values.email}
+                  style={{ backgroundColor: "#2c2c3e", color: "#ffffff", borderColor: "#a277ff" }}
                 />
               </Form.Group>
 
               <Form.Group controlId="formBasicPassword" className="mt-3">
-                <Form.Label className="text-white">Password</Form.Label>
+                <Form.Label style={{ color: "#c3aed6" }}>Password</Form.Label>
                 <Form.Control
                   type="password"
                   name="password"
                   placeholder="Password"
                   onChange={handleChange}
                   value={values.password}
+                  style={{ backgroundColor: "#2c2c3e", color: "#ffffff", borderColor: "#a277ff" }}
                 />
               </Form.Group>
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                }}
-                className="mt-4"
-              >
-                <Link to="/forgotPassword" className="text-white lnk">
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }} className="mt-4">
+                <Link to="/forgotPassword" style={{ color: "#a277ff", textDecoration: "none" }}>
                   Forgot Password?
                 </Link>
 
                 <Button
                   type="submit"
-                  className=" text-center mt-3 btnStyle"
+                  className="text-center mt-3"
                   onClick={!loading ? handleSubmit : null}
                   disabled={loading}
+                  style={{ backgroundColor: "#a277ff", borderColor: "#a277ff", color: "#1e1e2e" }}
                 >
-                  {loading ? "Signin…" : "Login"}
+                  {loading ? "Signing in…" : "Login"}
                 </Button>
 
                 <p className="mt-3" style={{ color: "#9d9494" }}>
                   Don't Have an Account?{" "}
-                  <Link to="/register" className="text-white lnk">
+                  <Link to="/register" style={{ color: "#a277ff", textDecoration: "none" }}>
                     Register
                   </Link>
                 </p>
